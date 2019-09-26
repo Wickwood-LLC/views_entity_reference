@@ -13,7 +13,7 @@ use Drupal\views\Plugin\views\join\JoinPluginBase;
  *
  * @ViewsJoin("referencing_entities")
  */
-class ReferencingEntities extends JoinPluginBase {
+class ReferencingEntitiesJoin extends JoinPluginBase {
 
   /**
    * Constructs a Drupal\views\Plugin\views\join\JoinPluginBase object.
