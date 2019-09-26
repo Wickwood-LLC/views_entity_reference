@@ -1,0 +1,7 @@
+name: 'Views Entity Reference'
+type: module
+description: 'Bring additional functionality around entity references.'
+package: Views
+core: 8.x
+dependencies:
+- views:views
