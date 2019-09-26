@@ -29,8 +29,8 @@ class ReferencingEntitiesJoin extends JoinPluginBase {
 
     $this->entity_type = $configuration['entity_type'];
     $this->type = $configuration['type'];
-    $this->table = $configuration['table'];
-    $this->field = $configuration['field'];
+    $this->entity_table = $configuration['entity_table'];
+    $this->entity_id_field = $configuration['entity_id_field'];
   }
 
   /**
@@ -64,8 +64,8 @@ class ReferencingEntitiesJoin extends JoinPluginBase {
       }
     }
 
-    $left_table = $view_query->getTableInfo($this->table);
-    $left_field = "$left_table[alias].$this->field";
+    $left_table = $view_query->getTableInfo($this->entity_table);
+    $left_field = "$left_table[alias].$this->entity_id_field";
 
     $condition = "{$left_field} = {$table['alias']}.target_id";
 

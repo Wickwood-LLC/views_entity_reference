@@ -41,8 +41,8 @@ class ReferencingEntitiesRelationship extends RelationshipPluginBase {
     $def = $this->definition;
     $def['entity_type'] = $this->definition['entity_type'];
     $def['adjusted'] = TRUE;
-    $def['table'] = $this->table;
-    $def['field'] = $this->field;
+    $def['entity_table'] = $this->table;
+    $def['entity_id_field'] = $this->field;
     if (!empty($this->options['required'])) {
       $def['type'] = 'INNER';
     }
