@@ -70,9 +70,9 @@ class ReferencingEntitiesJoin extends JoinPluginBase {
     $condition = "{$left_field} = {$table['alias']}.target_id";
 
     //$select_query->fields($table['alias'], ['entity_id', 'entity_type', 'bundle']);
-    $view_query->addField($table['alias'], 'entity_id');
-    $view_query->addField($table['alias'], 'entity_type');
-    $view_query->addField($table['alias'], 'bundle');
+    //$view_query->addField($table['alias'], 'entity_id');
+    //$view_query->addField($table['alias'], 'entity_type');
+    //$view_query->addField($table['alias'], 'bundle');
     $select_query->addJoin($this->type, $union_query, $table['alias'], $condition);
   }
 

@@ -1,0 +1,37 @@
+<?php
+
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_theme()
+ */
+function views_entity_reference_theme($existing, $type, $theme, $path) {
+  return [
+    'views_entity_reference' => [
+      'variables' => [
+        'referenced_entity_id' => NULL,
+        'referencing_entity_type' => NULL,
+        'referencing_entity_id' => NULL,
+        'referencing_entity_bundle' => NULL,
+      ],
+    ],
+  ];
+}
+
+
+function template_preprocess_views_entity_reference(&$variables) {
+  $referencing_entity_type = $variables['referencing_entity_type'];
+  $referencing_entity_id = $variables['referencing_entity_id'];
+  if ($referencing_entity_type && $referencing_entity_id) {
+    $variables['referencing_entity_view_link'] = array(
+      '#type' => 'link',
+      '#title' => t('View'),
+      '#url' => Url::fromUri("entity:{$referencing_entity_type}/{$referencing_entity_id}"),
+    );
+  }
+  // $link = Link::fromTextAndUrl(t('View'), $url);
+  // $rows[] = array(
+  //   'data' => (array)$row + 
+  //   [ 'link' => render($link)],
+  // );
+}
