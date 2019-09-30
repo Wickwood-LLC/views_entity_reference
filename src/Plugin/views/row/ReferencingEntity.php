@@ -16,7 +16,7 @@ use Drupal\views_entity_reference\Plugin\views\relationship\ReferencingEntitiesR
  *   id = "referencing_entity",
  *   title = @Translation("Referencing entity"),
  *   help = @Translation("Displays the details of referencing entity."),
- *   theme = "views_view_fields",
+ *   theme = "views_entity_reference",
  *   register_theme = FALSE,
  *   display_types = {"normal"}
  * )
@@ -75,9 +75,6 @@ class ReferencingEntity extends RowPluginBase {
       $this->field_entity_type = $this->view->query->addField($relationship->alias, 'entity_type');
       $this->field_entity_bundle = $this->view->query->addField($relationship->alias, 'bundle');
     }
-    // else {
-    //   $this->field_alias = $this->view->query->addField($this->base_table, $this->base_field);
-    // }
   }
 
   /**
@@ -91,9 +88,8 @@ class ReferencingEntity extends RowPluginBase {
    * {@inheritdoc}
    */
   public function render($row) {
-    $a = $this->themeFunctions();
     return [
-      '#theme' => 'views_entity_reference',
+      '#theme' => $this->themeFunctions(),
       '#referenced_entity_id' => $row->_entity->id(),
       '#referencing_entity_id' => $row->{$this->field_entity_id},
       '#referencing_entity_type' => $row->{$this->field_entity_type},
