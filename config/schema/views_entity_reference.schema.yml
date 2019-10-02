@@ -1,0 +1,11 @@
+views_entity_reference.settings:
+  type: config_object
+  label: 'VER Settings'
+  mapping:
+    enabled_entity_references:
+      type: sequence
+      label: 'Enabled entity references'
+      sequence:
+        type: string
+        label: Entity type
+
