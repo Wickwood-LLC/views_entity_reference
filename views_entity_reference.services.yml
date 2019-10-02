@@ -1,0 +1,4 @@
+services:
+  views_entity_reference.sql_view_manager:
+    class: Drupal\views_entity_reference\EntityReferencesSQLViewManager
+    arguments: ['@database']
