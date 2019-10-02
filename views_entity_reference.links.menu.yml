@@ -1,0 +1,6 @@
+view_entity_reference.settings_form:  
+  title: 'Views entity reference configuration'
+  route_name: view_entity_reference.settings_form
+  description: 'Configure VEC settings'
+  parent: system.admin_config_system
+  weight: 100
