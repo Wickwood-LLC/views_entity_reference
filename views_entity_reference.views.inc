@@ -14,7 +14,7 @@ function views_entity_reference_views_data() {
   foreach ($enabled_entity_references as $entity_type_id) {
     $entity_type = $entityTypeManager->getDefinition($entity_type_id);
     $view_name = 'entity_references_' . $entity_type_id;
-    $data[$view_name]['table']['group'] = t('Referencing media entities');
+    $data[$view_name]['table']['group'] = t('Referencing @entity_type_label',  ['@entity_type_label' => $entity_type->getLabel()]);
     $data[$view_name]['target_id'] = [
       'title' => t('@entity_type_label ID', ['@entity_type_label' => $entity_type->getLabel()]),
       'help' => t('Entity ID of referenced @entity_type_label entity.', ['@entity_type_label' => $entity_type->getLabel()]),
