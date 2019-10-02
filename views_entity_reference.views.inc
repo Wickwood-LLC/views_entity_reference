@@ -8,43 +8,68 @@ use Drupal\Core\Entity\ContentEntityInterface;
  */
 function views_entity_reference_views_data() {
   $data = [];
-  $data['referencing_entities']['table']['group'] = t('Referencing entities');
-  $data['referencing_entities']['entity_id'] = [
-    'title' => t('Entity ID'),
-    'help' => t('Entity ID of referencing entity.'),
-    'field' => [
-      'id' => 'standard',
-    ]
-  ];
-  return $data;
-}
 
-/**
- * Implements hook_views_data_alter().
- */
-function views_entity_reference_views_data_alter(&$data) {
-  $entity_definitions =  \Drupal::entityTypeManager()->getDefinitions();
-  foreach ($entity_definitions as $entity_type_id => $entity_type) {
-    if (!$entity_type->entityClassImplements(ContentEntityInterface::class) || !$entity_type->getBaseTable()) {
-      continue;
-    }
-
-    $base_table = $entity_type->getDataTable() ?: $entity_type->getBaseTable();
-    $args = ['@entity_type' => $entity_type_id, '@entity_type_label' => $entity_type->getLabel()];
-
-    $data[$base_table]['table']['join']['referencing_entities'] = [
-      
+  $entityTypeManager =  \Drupal::entityTypeManager();
+  $enabled_entity_references = array_filter(\Drupal::config('views_entity_reference.settings')->get('enabled_entity_references'));
+  foreach ($enabled_entity_references as $entity_type_id) {
+    $entity_type = $entityTypeManager->getDefinition($entity_type_id);
+    $view_name = 'entity_references_' . $entity_type_id;
+    $data[$view_name]['table']['group'] = t('Referencing media entities');
+    $data[$view_name]['target_id'] = [
+      'title' => t('@entity_type_label ID', ['@entity_type_label' => $entity_type->getLabel()]),
+      'help' => t('Entity ID of referenced @entity_type_label entity.', ['@entity_type_label' => $entity_type->getLabel()]),
+      'field' => [
+        'id' => 'standard',
+      ],
+    ];
+    $data[$view_name]['entity_id'] = [
+      'title' => t('Entity ID'),
+      'help' => t('Entity ID of referencing entity.'),
+      'field' => [
+        'id' => 'standard',
+      ]
+    ];
+    $data[$view_name]['entity_type'] = [
+      'title' => t('Entity type'),
+      'help' => t('Entity type of referencing entity.'),
+      'field' => [
+        'id' => 'standard',
+      ],
+      'filter' => [
+        'id' => 'views_entity_reference_entity_type',
+      ],
+    ];
+    $data[$view_name]['bundle'] = [
+      'title' => t('Entity bundle'),
+      'help' => t('Entity bundle of referencing entity.'),
+      'field' => [
+        'id' => 'standard',
+      ]
     ];
 
-    $data[$base_table]['referencing_entities'] = [
-      'title' => t('Entities referencing @entity_type', $args),
-      'help' => t('Entities referencing @entity_type through one of its entity references fields.', $args),
-      'relationship' => [
-        'group' => t('Entity reference', $args),
-        'label' => t('Entities referencing @entity_type', $args),
-        'relationship field' => $entity_type->getKey('id'),
-        'id' => 'referencing_entities',
+    $data[$view_name]['table']['join']['media_field_data'] = [
+      'left_table' => 'media_field_data',
+      'left_field' => 'mid',
+      'field' => 'target_id',
+    ];
+
+    $data[$view_name]['entity_view_url'] = [
+      'title' => t('Referencing entity URL'),
+      'help' => t('Referencing entity URL'),
+      'field' => [
+        'id' => 'referencing_entity_url',
+      ],
+      'sort' => [
+        'id' => 'standard',
+      ],
+      'filter' => [
+        'id' => 'string',
+      ],
+      'argument' => [
+        'id' => 'string',
       ],
     ];
   }
+
+  return $data;
 }
