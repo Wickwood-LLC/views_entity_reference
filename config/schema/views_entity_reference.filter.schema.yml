@@ -1,0 +1,45 @@
+# Schema for the views filter plugins.
+
+views.filter.views_entity_reference_entity_type:
+  type: views_filter
+  label: 'Referencing entity type'
+  mapping:
+    operator:
+      type: string
+      label: 'Operator'
+    value:
+      type: sequence
+      label: 'Values'
+      sequence:
+        type: string
+        label: 'Value'
+    expose:
+      type: mapping
+      label: 'Expose'
+      mapping:
+        reduce:
+          type: boolean
+          label: 'Reduce'
+    group_info:
+      mapping:
+        group_items:
+          sequence:
+            type: views.filter.group_item.in_operator
+            label: 'Group item'
+
+# Schema for the views group items.
+
+views.filter.group_item.views_entity_reference_entity_type:
+  type: views_filter_group_item
+  mapping:
+    value:
+      type: views.filter_value.in_operator
+
+# Schema for the views filter value.
+
+views.filter_value.views_entity_reference_entity_type:
+  type: sequence
+  label: 'Values'
+  sequence:
+    type: string
+    label: 'Value'
