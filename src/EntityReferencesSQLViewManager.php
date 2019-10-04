@@ -4,6 +4,7 @@ namespace Drupal\views_entity_reference;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Entity\ContentEntityInterface;
 
 class EntityReferencesSQLViewManager {
   /**
@@ -23,8 +24,9 @@ class EntityReferencesSQLViewManager {
    * @return boolean
    */
   public function viewExists($entity_type) {
-    return $schema = $this->database->schema()
+    $exists = $this->database->schema()
       ->tableExists("entity_references_{$entity_type}");
+    return $exists;
   }
 
   /**
@@ -75,6 +77,100 @@ class EntityReferencesSQLViewManager {
 
     // May be it is  MySQL specific?
     return $this->database->query("DROP VIEW  IF EXISTS {entity_references_" . $entity_type . "}");
+  }
+
+  public static function getContentEntityTypes() {
+    $entity_types =& drupal_static(__FUNCTION__);
+    if (!$entity_types) {
+      $entity_types = [];
+      $entity_definitions =  \Drupal::entityTypeManager()->getDefinitions();
+      foreach ($entity_definitions as $entity_type_id => $entity_type) {
+        if (!$entity_type->entityClassImplements(ContentEntityInterface::class) || !$entity_type->getBaseTable()) {
+          continue;
+        }
+
+        $entity_types[] = $entity_type_id;
+      }
+    }
+
+    return $entity_types;
+  }
+
+  public function getCurrentEntityReferenceFieldMap($reset = FALSE) {
+    $current_entity_reference_fields =& drupal_static(__FUNCTION__);
+    if (!$current_entity_reference_fields || $reset) {
+      $entity_types = static::getContentEntityTypes();
+
+      $entity_reference_field_map = \Drupal::service('entity_field.manager')->getFieldMapByFieldType('entity_reference');
+      $current_entity_reference_fields = array_flip($entity_types);
+
+      array_walk($current_entity_reference_fields, function(&$item){
+        $item = [];
+      });
+
+      foreach ($entity_reference_field_map as $entity_type_id => $field_list) {
+        $field_storage_definitions_for_entity_type = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions($entity_type_id);
+        foreach ($field_list as $field_name => $field_info) {
+          $sd = $field_storage_definitions_for_entity_type[$field_name];
+          if ($sd && !($sd instanceof BaseFieldDefinition)) {
+            $settings = $sd->getSettings();
+            if (isset($settings['target_type'])) {
+              $current_entity_reference_fields[$settings['target_type']][] = $field_name;
+            }
+          }
+        }
+      }
+    }
+    return $current_entity_reference_fields;
+  }
+
+  /**
+   * Get list of entity types tat need its SQL VIEWs to be refreshed.
+   * @return array
+   */
+  public function getRefreshList() {
+
+    $entity_types = static::getContentEntityTypes();
+    $current_entity_reference_fields = $this->getCurrentEntityReferenceFieldMap(TRUE);
+
+    $saved_entity_reference_fields = \Drupal::config('views_entity_reference.settings')->get('entity_reference_fields');
+    if (empty($saved_entity_reference_fields)) {
+      $saved_entity_reference_fields = array_flip($entity_types);
+      array_walk($saved_entity_reference_fields, function(&$item){
+        $item = [];
+      });
+    }
+
+    $entity_type_needs_refresh = [];
+
+    foreach ($current_entity_reference_fields as $entity_type_id => $fields) {
+      if (!empty(array_diff($current_entity_reference_fields[$entity_type_id], $saved_entity_reference_fields[$entity_type_id])) ||
+          !empty(array_diff($saved_entity_reference_fields[$entity_type_id], $current_entity_reference_fields[$entity_type_id]))
+      ) {
+        $entity_type_needs_refresh[] = $entity_type_id;
+      }
+    }
+
+    /**
+      * Re-create SQL VIEWs for the entity references fields as necessary.
+      */
+    return $entity_type_needs_refresh;
+  }
+
+  public function refresh() {
+    $entity_type_needs_refresh = $this->getRefreshList();
+    if (!empty($entity_type_needs_refresh)) {
+      foreach ($entity_type_needs_refresh as $entity_type_id) {
+        $this->deleteView($entity_type_id);
+        $this->createView($entity_type_id);
+      }
+      $current_entity_reference_fields = $this->getCurrentEntityReferenceFieldMap(TRUE);
+
+      \Drupal::service('config.factory')
+        ->getEditable('views_entity_reference.settings')
+        ->set('entity_reference_fields', $current_entity_reference_fields)
+        ->save();
+    }
   }
   
 }
