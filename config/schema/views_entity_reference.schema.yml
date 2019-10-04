@@ -7,5 +7,14 @@ views_entity_reference.settings:
       label: 'Enabled entity references'
       sequence:
         type: string
-        label: Entity type
+        label: 'Entity'
+    entity_reference_fields:
+      type: sequence
+      label: 'Entity reference fields'
+      sequence:
+        type: sequence
+        label: 'Fields per entity type'
+        sequence:
+          type: string
+          label: 'Field'
 
