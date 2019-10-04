@@ -12,7 +12,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  */
 class SettingsForm extends ConfigFormBase {
 
-  /** 
+  /**
    * Config settings.
    *
    * @var string
@@ -26,7 +26,7 @@ class SettingsForm extends ConfigFormBase {
     return 'view_entity_reference_settings';
   }
 
-  /** 
+  /**
    * {@inheritdoc}
    */
   protected function getEditableConfigNames() {
@@ -49,7 +49,6 @@ class SettingsForm extends ConfigFormBase {
     $entity_types_having_referenced_fields = [];
 
     $entity_reference_field_map = \Drupal::service('entity_field.manager')->getFieldMapByFieldType('entity_reference');
-    $union_query = NULL;
     foreach ($entity_reference_field_map as $entity_type_id => $field_list) {
       $field_storage_definitions_for_entity_type = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions($entity_type_id);
       foreach ($field_list as $field_name => $field_info) {
