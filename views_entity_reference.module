@@ -1,3 +1,48 @@
 <?php
 
 use Drupal\Core\Url;
+use Drupal\field\Entity\FieldStorageConfig;
+
+/**
+ * Implements hook_cron()
+ */
+function views_entity_reference_cron() {
+  $view_manager = Drupal::service('views_entity_reference.sql_view_manager');
+  // Just refresh SQL VIEWS for entity reference fields as necessary
+  // TODO: Use Queue API?
+  $list = $view_manager->refresh();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_create()
+ */
+function views_entity_reference_entity_insert(\Drupal\Core\Entity\EntityInterface $entity) {
+  // TODO: Enhance. It loads cached field config so newly added field does not get noted.
+  if ($entity instanceof FieldStorageConfig) {
+    if ($entity->get('type') == 'entity_reference') {
+      $view_manager = Drupal::service('views_entity_reference.sql_view_manager');
+      $list = $view_manager->refresh();
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_create()
+ */
+function views_entity_reference_entity_delete(\Drupal\Core\Entity\EntityInterface $entity) {
+  // TODO: Enhance. It loads cached field config so just deleted field does not get noted.
+  if ($entity instanceof FieldStorageConfig) {
+    if ($entity->get('type') == 'entity_reference') {
+      $view_manager = Drupal::service('views_entity_reference.sql_view_manager');
+      $list = $view_manager->refresh();
+    }
+  }
+}
+
+/**
+ * Implements hook_rebuild()
+ */
+function views_entity_reference_rebuild() {
+  $view_manager = Drupal::service('views_entity_reference.sql_view_manager');
+  $list = $view_manager->refresh();
+}
