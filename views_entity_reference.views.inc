@@ -44,7 +44,10 @@ function views_entity_reference_views_data() {
       'help' => t('Entity bundle of referencing entity.'),
       'field' => [
         'id' => 'standard',
-      ]
+      ],
+      'filter' => [
+        'id' => 'views_entity_reference_entity_type_bundle',
+      ],
     ];
 
     $data[$view_name]['table']['join']['media_field_data'] = [
