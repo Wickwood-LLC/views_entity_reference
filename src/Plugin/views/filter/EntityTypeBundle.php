@@ -82,7 +82,7 @@ class EntityTypeBundle extends InOperator {
         $a = 9;
         // $bundle_options = [];
         foreach ($bundles as $bundle_name => $info) {
-          $options[$entity_type_id . ':' . $bundle_name]  = '--> '.  $info['label'];
+          $options[$entity_type_id . ':' . $bundle_name]  = $this->t('---- @bundle_label', ['@entity_label' => $entity_type->getLabel(), '@bundle_label' => $info['label']]);
         }
         // $label = $entity_type->getLabel();
         // $options[$entity_type->getLabel()] = $bundle_options;
