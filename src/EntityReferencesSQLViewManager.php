@@ -101,7 +101,13 @@ class EntityReferencesSQLViewManager {
     if (!$current_entity_reference_fields || $reset) {
       $entity_types = static::getContentEntityTypes();
 
-      $entity_reference_field_map = \Drupal::service('entity_field.manager')->getFieldMapByFieldType('entity_reference');
+      $entity_field_manager = \Drupal::service('entity_field.manager');
+
+      if ($reset) {
+        $entity_field_manager->clearCachedFieldDefinitions();
+      }
+
+      $entity_reference_field_map = $entity_field_manager->getFieldMapByFieldType('entity_reference');
       $current_entity_reference_fields = array_flip($entity_types);
 
       array_walk($current_entity_reference_fields, function(&$item){
