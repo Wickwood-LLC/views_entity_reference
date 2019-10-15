@@ -5,6 +5,7 @@ namespace Drupal\views_entity_reference;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\field\Entity\FieldStorageConfig;
 
 class EntityReferencesSQLViewManager {
   /**
@@ -38,9 +39,9 @@ class EntityReferencesSQLViewManager {
     $union_query = NULL;
     foreach ($entity_reference_field_map as $entity_type_id => $field_list) {
       $field_storage_definitions_for_entity_type = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions($entity_type_id);
-      foreach ($field_list as $field_name => $field_info) {
+      foreach ($field_storage_definitions_for_entity_type as $field_name => $field_info) {
         $sd = $field_storage_definitions_for_entity_type[$field_name];
-        if ($sd && !($sd instanceof BaseFieldDefinition)) {
+        if ($sd && !($sd instanceof BaseFieldDefinition) && $sd->get('type') == 'entity_reference') {
           $settings = $sd->getSettings();
           if (isset($settings['target_type']) && $settings['target_type'] == $entity_type) {
             $table_name = $entity_type_id . '__' . $field_name;
@@ -163,8 +164,13 @@ class EntityReferencesSQLViewManager {
     return $entity_type_needs_refresh;
   }
 
-  public function refresh() {
+  public function refresh(FieldStorageConfig $new_field_storage_config = NULL) {
     $entity_type_needs_refresh = $this->getRefreshList();
+    if ($new_field_storage_config) {
+      $settings = $new_field_storage_config->get('settings');
+      if (isset($settings['target_type']) && !in_array($settings['target_type'], $entity_type_needs_refresh))
+      $entity_type_needs_refresh[] = $settings['target_type'];
+    }
     if (!empty($entity_type_needs_refresh)) {
       foreach ($entity_type_needs_refresh as $entity_type_id) {
         $this->deleteView($entity_type_id);

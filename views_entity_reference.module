@@ -14,28 +14,22 @@ function views_entity_reference_cron() {
 }
 
 /**
- * Implements hook_ENTITY_TYPE_create()
+ * Implements hook_ENTITY_TYPE_insert()
  */
-function views_entity_reference_entity_insert(\Drupal\Core\Entity\EntityInterface $entity) {
-  // TODO: Enhance. It loads cached field config so newly added field does not get noted.
-  if ($entity instanceof FieldStorageConfig) {
-    if ($entity->get('type') == 'entity_reference') {
-      $view_manager = Drupal::service('views_entity_reference.sql_view_manager');
-      $list = $view_manager->refresh();
-    }
+function views_entity_reference_field_storage_config_insert(FieldStorageConfig $entity) {
+  if ($entity->get('type') == 'entity_reference') {
+    $view_manager = Drupal::service('views_entity_reference.sql_view_manager');
+    $list = $view_manager->refresh($entity);
   }
 }
 
 /**
- * Implements hook_ENTITY_TYPE_create()
+ * Implements hook_ENTITY_TYPE_delete()
  */
-function views_entity_reference_entity_delete(\Drupal\Core\Entity\EntityInterface $entity) {
-  // TODO: Enhance. It loads cached field config so just deleted field does not get noted.
-  if ($entity instanceof FieldStorageConfig) {
-    if ($entity->get('type') == 'entity_reference') {
-      $view_manager = Drupal::service('views_entity_reference.sql_view_manager');
-      $list = $view_manager->refresh();
-    }
+function views_entity_reference_field_storage_config_delete(FieldStorageConfig $entity) {
+  if ($entity->get('type') == 'entity_reference') {
+    $view_manager = Drupal::service('views_entity_reference.sql_view_manager');
+    $list = $view_manager->refresh();
   }
 }
 
