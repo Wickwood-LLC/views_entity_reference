@@ -6,6 +6,7 @@ use Drupal\Core\Database\Connection;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\Core\Entity\Sql\SqlContentEntityStorageException;
 
 class EntityReferencesSQLViewManager {
   /**
@@ -44,14 +45,22 @@ class EntityReferencesSQLViewManager {
         if ($sd && !($sd instanceof BaseFieldDefinition) && $sd->get('type') == 'entity_reference') {
           $settings = $sd->getSettings();
           if (isset($settings['target_type']) && $settings['target_type'] == $entity_type) {
-            $table_name = $entity_type_id . '__' . $field_name;
-            $table_query = "SELECT bundle, deleted, entity_id, revision_id, langcode, delta, {$field_name}_target_id AS target_id, ('$entity_type_id' COLLATE utf8mb4_unicode_ci ) AS entity_type
-            FROM {" . $table_name . "}";
-            if (!$union_query) {
-              $union_query = $table_query;
+            try {
+              // $table_name = $entity_type_id . '__' . $field_name;
+              $table_mapping = \Drupal::entityTypeManager()->getStorage($entity_type_id)->getTableMapping();
+              $table_name = $table_mapping->getFieldTableName($field_name);
+
+              $table_query = "SELECT bundle, deleted, entity_id, revision_id, langcode, delta, {$field_name}_target_id AS target_id, ('$entity_type_id' COLLATE utf8mb4_unicode_ci ) AS entity_type
+              FROM {" . $table_name . "}";
+              if (!$union_query) {
+                $union_query = $table_query;
+              }
+              else {
+                $union_query .= " UNION " . $table_query;
+              }
             }
-            else {
-              $union_query .= " UNION " . $table_query;
+            catch (SqlContentEntityStorageException $e) {
+              // TODO: Do something to fined correct table name?
             }
           }
         }
@@ -184,5 +193,4 @@ class EntityReferencesSQLViewManager {
         ->save();
     }
   }
-  
 }
