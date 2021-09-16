@@ -180,6 +180,15 @@ class EntityReferencesSQLViewManager {
       if (isset($settings['target_type']) && !in_array($settings['target_type'], $entity_type_needs_refresh))
       $entity_type_needs_refresh[] = $settings['target_type'];
     }
+
+    // Delete the SQL views we previously created.
+    $existing_view_entity_types = \Drupal::state()->get('views_entity_reference.view_entity_types');
+    if (!empty($existing_view_entity_types)) {
+      foreach ($existing_view_entity_types as $entity_type_id) {
+        $this->deleteView($entity_type_id);
+      }
+    }
+
     if (!empty($entity_type_needs_refresh)) {
       foreach ($entity_type_needs_refresh as $entity_type_id) {
         $this->deleteView($entity_type_id);
@@ -192,5 +201,8 @@ class EntityReferencesSQLViewManager {
         ->set('entity_reference_fields', $current_entity_reference_fields)
         ->save();
     }
+
+    // Keep names of entity_types we handled. So, as we need to delete corresponding SQL views next time.
+    \Drupal::state()->set('views_entity_reference.view_entity_types', $entity_type_needs_refresh);
   }
 }
