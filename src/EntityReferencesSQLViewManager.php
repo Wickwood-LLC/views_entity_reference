@@ -127,7 +127,7 @@ class EntityReferencesSQLViewManager {
       foreach ($entity_reference_field_map as $entity_type_id => $field_list) {
         $field_storage_definitions_for_entity_type = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions($entity_type_id);
         foreach ($field_list as $field_name => $field_info) {
-          $sd = $field_storage_definitions_for_entity_type[$field_name];
+          $sd = $field_storage_definitions_for_entity_type[$field_name] ?? NULL;
           if ($sd && !($sd instanceof BaseFieldDefinition)) {
             $settings = $sd->getSettings();
             if (isset($settings['target_type'])) {
@@ -160,8 +160,8 @@ class EntityReferencesSQLViewManager {
     $entity_type_needs_refresh = [];
 
     foreach ($current_entity_reference_fields as $entity_type_id => $fields) {
-      if (!empty(array_diff($current_entity_reference_fields[$entity_type_id], $saved_entity_reference_fields[$entity_type_id])) ||
-          !empty(array_diff($saved_entity_reference_fields[$entity_type_id], $current_entity_reference_fields[$entity_type_id]))
+      if (!empty(array_diff($current_entity_reference_fields[$entity_type_id], $saved_entity_reference_fields[$entity_type_id] ?? [])) ||
+          !empty(array_diff($saved_entity_reference_fields[$entity_type_id] ?? [], $current_entity_reference_fields[$entity_type_id]))
       ) {
         $entity_type_needs_refresh[] = $entity_type_id;
       }
